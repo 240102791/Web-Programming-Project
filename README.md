@@ -24,5 +24,5 @@ A dynamic, responsive weather application that fetches real-time weather conditi
 
 ---
 *Developed by Ahmed Mohamed Fathy Aldmrdash (ID: 240102791)*
-*Developed by Omar Ahmed Ramadan Ramadan (ID: 240102684)*
-*Developed by Shimaa Hussien (ID: 240102170)*
+And *Developed by Omar Ahmed Ramadan Ramadan (ID: 240102684)*
+And *Developed by Shimaa Hussien (ID: 240102170)*
