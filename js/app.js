@@ -7,6 +7,10 @@
 const API_KEY = 'dc6995fce2cbfe9781f339cb5d7a2288';
 const BASE_URL = 'https://api.openweathermap.org/data/2.5';
 
+// =========================================================
+// Helper Functions & Bonuses
+// =========================================================
+
 // 1. Local Icons Mapping: Link weather conditions to local images
 function getWeatherIcon(condition) {
     const desc = condition.toLowerCase();
@@ -36,23 +40,71 @@ function getWeatherIcon(condition) {
     return `${path}icon.png`; 
 }
 
-// 2. Event Handling: Handle search form submission and prevent page reload
-document.getElementById('search-form').addEventListener('submit', async (e) => {
-    e.preventDefault(); 
-    
-    const cityInput = document.getElementById('city-input');
-    const city = cityInput.value.trim();
-    
-    if (city) {
-        const isSuccess = await fetchWeatherData(city);
-        if (isSuccess) {
-            await saveCityToHistory(city); // Wait for the city to be saved
-        }
-        cityInput.value = ''; // Clear search input
-    }
-});
+// 2. BONUS FEATURE 2: Dynamic Background Change based on weather (Fully Covered)
+const updateBackground = (condition) => {
+    const desc = condition.toLowerCase();
+    const body = document.body;
 
-// 3. Fetch API (async/await): Fetch weather data with error handling
+    // Clear previous background classes
+    body.classList.remove('bg-clear', 'bg-clouds', 'bg-rain', 'bg-thunderstorm', 'bg-snow', 'bg-mist');
+
+    // Cover all possible conditions from OpenWeatherMap
+    if (desc.includes("clear")) {
+        body.classList.add('bg-clear');
+    } 
+    else if (desc.includes("cloud") || desc.includes("overcast")) {
+        body.classList.add('bg-clouds');
+    } 
+    else if (desc.includes("rain") || desc.includes("drizzle") || desc.includes("squall")) {
+        body.classList.add('bg-rain');
+    } 
+    else if (desc.includes("thunderstorm") || desc.includes("tornado")) {
+        body.classList.add('bg-thunderstorm'); 
+    } 
+    else if (desc.includes("snow") || desc.includes("sleet")) {
+        body.classList.add('bg-snow');
+    } 
+    else if (desc.includes("mist") || desc.includes("fog") || desc.includes("haze") || 
+             desc.includes("dust") || desc.includes("sand") || desc.includes("smoke") || desc.includes("ash")) {
+        body.classList.add('bg-mist'); 
+    } 
+    else {
+        // Fallback condition
+        body.classList.add('bg-clouds'); 
+    }
+};
+
+// 3. BONUS FEATURE 3: Interactive Map (Leaflet.js)
+let map;
+let marker;
+
+const updateMap = (lat, lon, temp, city) => {
+    if (!map) {
+        map = L.map('map').setView([lat, lon], 10);
+        L.tileLayer('https://{s}.tile.openstreetmap.org/{z}/{x}/{y}.png', {
+            attribution: '© OpenStreetMap contributors'
+        }).addTo(map);
+    } else {
+        map.flyTo([lat, lon], 10, {
+            animate: true,
+            duration: 1.5 
+        });
+    }
+
+    if (marker) {
+        map.removeLayer(marker);
+    }
+
+    marker = L.marker([lat, lon]).addTo(map)
+        .bindPopup(`<strong style="color:#0284c7;">${city}</strong><br>Temp: ${Math.round(temp)}°C`)
+        .openPopup();
+};
+
+// =========================================================
+// API & Data Handling
+// =========================================================
+
+// 4. Fetch API (async/await): Fetch weather data with error handling
 const fetchWeatherData = async (city) => {
     try {
         const [currentRes, forecastRes] = await Promise.all([
@@ -61,7 +113,15 @@ const fetchWeatherData = async (city) => {
         ]);
 
         if (!currentRes.ok || !forecastRes.ok) {
-            alert("City not found. Please check the spelling.");
+            // SweetAlert2 Error Notification
+            Swal.fire({
+                icon: 'error',
+                title: 'Oops...',
+                text: 'City not found. Please check the spelling!',
+                confirmButtonColor: '#38bdf8',
+                background: document.body.classList.contains('light-mode') ? '#fff' : '#1e293b',
+                color: document.body.classList.contains('light-mode') ? '#0f172a' : '#f8fafc'
+            });
             return false;
         }
 
@@ -79,12 +139,13 @@ const fetchWeatherData = async (city) => {
     }
 };
 
-// 4. DOM Manipulation: Display current weather (with full country name)
+// 5. DOM Manipulation: Display current weather & Smart Tips
 const displayCurrentWeather = (data) => {
+    updateBackground(data.weather[0].description);
+    
     const weatherSection = document.getElementById('current-weather');
     const iconUrl = getWeatherIcon(data.weather[0]?.description || '');
     
-    // Attempt to get the full country name
     let fullCountryName = data.sys.country;
     try {
         const regionNames = new Intl.DisplayNames(['en'], {type: 'region'});
@@ -105,9 +166,53 @@ const displayCurrentWeather = (data) => {
             </div>
         </div>
     `;
+
+    // Update the interactive map
+    const lat = data.coord.lat;
+    const lon = data.coord.lon;
+    const currentTemp = data.main.temp;
+    updateMap(lat, lon, currentTemp, data.name);
+
+    // ==========================================
+    // Smart Advice Logic (SweetAlert2 Toast)
+    // ==========================================
+    let advice = "";
+    let adviceIcon = "info";
+
+    if (data.weather[0].main.toLowerCase() === "rain" || data.weather[0].main.toLowerCase() === "drizzle") {
+        advice = "It's raining! Don't forget your umbrella ☂️";
+        adviceIcon = "warning";
+    } else if (data.main.temp > 30) {
+        advice = "It's quite hot! Stay hydrated and drink plenty of water 💧";
+        adviceIcon = "warning";
+    } else if (data.main.temp < 15) {
+        advice = "It's cold out there! Wear something heavy 🧥";
+        adviceIcon = "info";
+    } else {
+        advice = "The weather is great! Have a wonderful day 🌟";
+        adviceIcon = "success";
+    }
+
+    // Show sleek toast notification (10 seconds with Close Button)
+    const Toast = Swal.mixin({
+        toast: true,
+        position: 'top-end',
+        showConfirmButton: false,
+        showCloseButton: true,
+        timer: 10000,
+        timerProgressBar: true,
+        background: document.body.classList.contains('light-mode') ? '#fff' : '#1e293b',
+        color: document.body.classList.contains('light-mode') ? '#0f172a' : '#f8fafc'
+    });
+
+    Toast.fire({
+        icon: adviceIcon,
+        title: `${data.name} Weather`,
+        text: advice
+    });
 };
 
-// 5. Array Methods: Display 5-day forecast (calculating true daily max/min)
+// 6. Array Methods: Display 5-day forecast
 const displayForecast = (data) => {
     const forecastContainer = document.getElementById('forecast-cards');
     const forecastSection = document.querySelector('.forecast-section');
@@ -115,7 +220,6 @@ const displayForecast = (data) => {
 
     forecastContainer.innerHTML = ''; 
 
-    // Aggregate daily data to find highest and lowest temperatures
     const dailyForecasts = {};
     
     data.list.forEach(item => {
@@ -135,17 +239,14 @@ const displayForecast = (data) => {
             if (item.main.temp_min < dailyForecasts[dateStr].temp_min) {
                 dailyForecasts[dateStr].temp_min = item.main.temp_min;
             }
-            // Capture weather condition around noon
             if (item.dt_txt.includes("12:00:00")) {
                 dailyForecasts[dateStr].weather = item.weather;
             }
         }
     });
 
-    // Convert object to array and take the first 5 days
     const dailyData = Object.values(dailyForecasts).slice(0, 5);
 
-    // Build forecast cards
     dailyData.forEach(day => {
         const date = new Date(day.dt * 1000).toLocaleDateString('en-US', { weekday: 'short' });
         const iconUrl = getWeatherIcon(day.weather[0]?.description || '');
@@ -165,11 +266,10 @@ const displayForecast = (data) => {
         forecastContainer.appendChild(card);
     });
 
-    // Render detailed table
     renderForecastTable(dailyData, forecastSection || forecastContainer.parentElement);
 };
 
-// 6. HTML Table Requirement: Render forecast table
+// 7. Render forecast table
 const renderForecastTable = (dailyData, container) => {
     if (!container) return; 
 
@@ -213,7 +313,11 @@ const renderForecastTable = (dailyData, container) => {
     container.appendChild(table);
 };
 
-// 7. PHP Integration: Save new city to database (Wait for success)
+// =========================================================
+// Backend Integration & Auto-Detect
+// =========================================================
+
+// 8. PHP Integration: Save new city to database
 const saveCityToHistory = async (city) => {
     try {
         const response = await fetch('api/save_city.php', {
@@ -223,14 +327,14 @@ const saveCityToHistory = async (city) => {
         });
         
         if (response.ok) {
-            await updateSidebar(); // Update sidebar immediately after saving
+            await updateSidebar(); 
         }
     } catch (err) {
         console.warn("Database Error: Could not save to history.");
     }
 };
 
-// 8. PHP Integration: Fetch history and display strictly as received from server
+// 9. PHP Integration: Fetch history
 const updateSidebar = async () => {
     try {
         const response = await fetch('api/get_history.php');
@@ -240,14 +344,11 @@ const updateSidebar = async () => {
         const sidebarContainer = document.getElementById('saved-cities');
         
         if (sidebarContainer) {
-            // If history is empty, show a fallback message
             if (history.length === 0) {
                 sidebarContainer.innerHTML = '<p style="color: var(--text-dim); font-size: 0.8rem; padding: 10px;">No recent searches</p>';
                 return;
             }
 
-            // Display cities exactly in the order they come from the DB (Latest ID First)
-            // Added saveCityToHistory inside onclick to push the city to the top when clicked
             sidebarContainer.innerHTML = history.map(item => `
                 <div class="saved-city" onclick="fetchWeatherData('${item.city_name}'); saveCityToHistory('${item.city_name}');">
                     ${item.city_name}
@@ -259,20 +360,62 @@ const updateSidebar = async () => {
     }
 };
 
+// 10. BONUS FEATURE 1: Auto-Detect User Location
+const getUserLocation = () => {
+    if (navigator.geolocation) {
+        navigator.geolocation.getCurrentPosition(async (position) => {
+            const lat = position.coords.latitude;
+            const lon = position.coords.longitude;
+
+            try {
+                const response = await fetch(`${BASE_URL}/weather?lat=${lat}&lon=${lon}&appid=${API_KEY}`);
+                const data = await response.json();
+                
+                if (data && data.name) {
+                    const isSuccess = await fetchWeatherData(data.name);
+                    if (isSuccess) {
+                        saveCityToHistory(data.name); 
+                    }
+                }
+            } catch (error) {
+                console.warn("Could not fetch weather for current location.");
+            }
+        }, (error) => {
+            console.log("User denied geolocation access or it failed.");
+        });
+    }
+};
+
 // =========================================================
-// 10. Dark/Light Mode Toggle Logic
+// Event Listeners & Initialization
 // =========================================================
+
+// Handle search form submission
+document.getElementById('search-form').addEventListener('submit', async (e) => {
+    e.preventDefault(); 
+    
+    const cityInput = document.getElementById('city-input');
+    const city = cityInput.value.trim();
+    
+    if (city) {
+        const isSuccess = await fetchWeatherData(city);
+        if (isSuccess) {
+            await saveCityToHistory(city); 
+        }
+        cityInput.value = ''; 
+    }
+});
+
+// Dark/Light Mode Toggle Logic
 const themeToggle = document.getElementById('theme-toggle');
 const body = document.body;
 
-// Check Local Storage for previous theme preference
 const currentTheme = localStorage.getItem('theme');
 if (currentTheme === 'light') {
     body.classList.add('light-mode');
     themeToggle.innerHTML = '🌙 Dark Mode';
 }
 
-// Toggle logic on button click
 themeToggle.addEventListener('click', () => {
     body.classList.toggle('light-mode');
     
@@ -285,41 +428,7 @@ themeToggle.addEventListener('click', () => {
     }
 });
 
-
-// =========================================================
-// BONUS FEATURE: Auto-Detect User Location
-// =========================================================
-const getUserLocation = () => {
-    // التأكد إن المتصفح بيدعم تحديد الموقع
-    if (navigator.geolocation) {
-        navigator.geolocation.getCurrentPosition(async (position) => {
-            const lat = position.coords.latitude;
-            const lon = position.coords.longitude;
-
-            try {
-                // نستخدم خطوط الطول والعرض عشان نجيب اسم المدينة من الـ API
-                const response = await fetch(`${BASE_URL}/weather?lat=${lat}&lon=${lon}&appid=${API_KEY}`);
-                const data = await response.json();
-                
-                if (data && data.name) {
-                    // بمجرد ما نعرف اسم مدينته، نشغل دالة البحث بتاعتنا كأنه كتبها
-                    const isSuccess = await fetchWeatherData(data.name);
-                    if (isSuccess) {
-                        saveCityToHistory(data.name); // نحفظها له في السيد بار كمان
-                    }
-                }
-            } catch (error) {
-                console.warn("Could not fetch weather for current location.");
-            }
-        }, (error) => {
-            // لو اليوزر رفض يدي الصلاحية، مش هيحصل إيرور والموقع هيشتغل عادي
-            console.log("User denied geolocation access or it failed.");
-        });
-    }
-};
-
-// 9. Load history when the page first opens
-// 9. Load history and auto-detect location when the page first opens
+// Load history and auto-detect location on startup
 window.onload = () => {
     updateSidebar();
     getUserLocation(); 

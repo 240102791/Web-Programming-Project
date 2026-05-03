@@ -7,9 +7,11 @@
     
     <!-- Favicon: Added to display the project icon in the browser tab -->
     <link rel="icon" type="image/png" href="images/icon.png">
+    <script src="https://cdn.jsdelivr.net/npm/sweetalert2@11"></script>
 
     <!-- External Stylesheet -->
     <link rel="stylesheet" href="css/style.css">
+    <link rel="stylesheet" href="https://unpkg.com/leaflet@1.9.4/dist/leaflet.css" />
 </head>
 <body>
     
@@ -46,6 +48,10 @@
                 <!-- Weather card injected dynamically via JavaScript -->
             </section>
 
+            <section id="map-section" style="margin-bottom: 40px;">
+                <div id="map"></div>
+            </section>
+
             <!-- 5-Day Forecast Section: Includes visual cards and detailed data table -->
             <section class="forecast-section">
                 <h3>5-Day Forecast</h3>
@@ -67,6 +73,7 @@
     </div>
 
     <!-- Core Logic: External JavaScript file -->
+    <script src="https://unpkg.com/leaflet@1.9.4/dist/leaflet.js"></script>
     <script src="js/app.js"></script>
 </body>
 </html>
