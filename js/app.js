@@ -285,5 +285,42 @@ themeToggle.addEventListener('click', () => {
     }
 });
 
+
+// =========================================================
+// BONUS FEATURE: Auto-Detect User Location
+// =========================================================
+const getUserLocation = () => {
+    // التأكد إن المتصفح بيدعم تحديد الموقع
+    if (navigator.geolocation) {
+        navigator.geolocation.getCurrentPosition(async (position) => {
+            const lat = position.coords.latitude;
+            const lon = position.coords.longitude;
+
+            try {
+                // نستخدم خطوط الطول والعرض عشان نجيب اسم المدينة من الـ API
+                const response = await fetch(`${BASE_URL}/weather?lat=${lat}&lon=${lon}&appid=${API_KEY}`);
+                const data = await response.json();
+                
+                if (data && data.name) {
+                    // بمجرد ما نعرف اسم مدينته، نشغل دالة البحث بتاعتنا كأنه كتبها
+                    const isSuccess = await fetchWeatherData(data.name);
+                    if (isSuccess) {
+                        saveCityToHistory(data.name); // نحفظها له في السيد بار كمان
+                    }
+                }
+            } catch (error) {
+                console.warn("Could not fetch weather for current location.");
+            }
+        }, (error) => {
+            // لو اليوزر رفض يدي الصلاحية، مش هيحصل إيرور والموقع هيشتغل عادي
+            console.log("User denied geolocation access or it failed.");
+        });
+    }
+};
+
 // 9. Load history when the page first opens
-window.onload = updateSidebar;
+// 9. Load history and auto-detect location when the page first opens
+window.onload = () => {
+    updateSidebar();
+    getUserLocation(); 
+};
