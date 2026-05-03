@@ -1,0 +1,405 @@
+/* =========================================================
+   Modern & Chic Weather Dashboard - Styling
+   Team Leader: Ahmed Aldmrdash
+========================================================= */
+
+/* استدعاء خط Poppins المودرن من جوجل */
+@import url('https://fonts.googleapis.com/css2?family=Poppins:wght@300;400;500;600;700;800&display=swap');
+
+/* --- الألوان والمتغيرات الأساسية (الوضع المظلم الافتراضي) --- */
+:root {
+    --primary-bg: #090e17; /* أغمق وأشيك */
+    --secondary-bg: rgba(30, 41, 59, 0.7);
+    --accent-color: #38bdf8;
+    --text-main: #f8fafc;
+    --text-dim: #94a3b8;
+    --glass-bg: rgba(255, 255, 255, 0.03);
+    --glass-border: rgba(255, 255, 255, 0.08);
+    --card-shadow: 0 20px 40px -10px rgba(0, 0, 0, 0.4);
+}
+
+* {
+    box-sizing: border-box;
+    margin: 0;
+    padding: 0;
+    font-family: 'Poppins', sans-serif; /* تطبيق الخط الجديد */
+}
+
+/* تخصيص شكل الـ Scrollbar ليكون مودرن */
+::-webkit-scrollbar {
+    width: 8px;
+}
+::-webkit-scrollbar-track {
+    background: var(--primary-bg);
+}
+::-webkit-scrollbar-thumb {
+    background: var(--accent-color);
+    border-radius: 10px;
+}
+
+body {
+    background-color: var(--primary-bg);
+    color: var(--text-main);
+    transition: background-color 0.5s ease, color 0.5s ease;
+    overflow-x: hidden;
+}
+
+/* --- CSS Grid: التخطيط الأساسي للشاشة --- */
+.dashboard-container {
+    display: grid;
+    grid-template-columns: 280px 1fr;
+    grid-template-areas: "sidebar main";
+    min-height: 100vh;
+}
+
+/* --- القائمة الجانبية (Sidebar) --- */
+.sidebar {
+    grid-area: sidebar;
+    background: var(--secondary-bg);
+    backdrop-filter: blur(20px);
+    -webkit-backdrop-filter: blur(20px);
+    padding: 40px 20px;
+    border-right: 1px solid var(--glass-border);
+    transition: 0.5s ease;
+}
+
+.sidebar h2 {
+    font-size: 1.2rem;
+    margin-bottom: 30px;
+    color: var(--text-dim);
+    text-transform: uppercase;
+    letter-spacing: 2px;
+    font-weight: 600;
+}
+
+.saved-city {
+    background: var(--glass-bg);
+    padding: 15px 20px;
+    border-radius: 15px;
+    margin-bottom: 12px;
+    cursor: pointer;
+    font-weight: 500;
+    transition: all 0.3s cubic-bezier(0.4, 0, 0.2, 1);
+    border: 1px solid transparent;
+}
+
+.saved-city:hover {
+    background: rgba(56, 189, 248, 0.1);
+    border-color: rgba(56, 189, 248, 0.3);
+    color: var(--accent-color);
+    transform: translateX(8px);
+    box-shadow: 0 5px 15px rgba(0, 0, 0, 0.2);
+}
+
+/* --- المنطقة الرئيسية (Main Content) --- */
+.main-content {
+    grid-area: main;
+    padding: 50px;
+    background: radial-gradient(circle at top right, rgba(30, 41, 59, 0.8), var(--primary-bg));
+    transition: background 0.5s ease;
+}
+
+nav h1 {
+    font-size: 2.5rem;
+    margin-bottom: 0;
+    font-weight: 800;
+    background: linear-gradient(135deg, #ffffff, #38bdf8);
+    -webkit-background-clip: text;
+    -webkit-text-fill-color: transparent;
+    letter-spacing: -1px;
+}
+
+/* تنسيق زرار الـ Theme */
+.theme-toggle {
+    background: var(--glass-bg);
+    border: 1px solid var(--glass-border);
+    color: var(--text-main);
+    padding: 10px 20px;
+    border-radius: 30px; /* دائري أكثر */
+    cursor: pointer;
+    font-weight: 600;
+    transition: all 0.3s ease;
+    -webkit-backdrop-filter: blur(10px);
+    backdrop-filter: blur(10px);
+}
+
+.theme-toggle:hover {
+    background: rgba(255, 255, 255, 0.1);
+    transform: translateY(-2px);
+    box-shadow: 0 10px 20px rgba(0, 0, 0, 0.2);
+}
+
+/* --- نموذج البحث (شكل الكبسولة المودرن) --- */
+.search-section {
+    margin-bottom: 50px;
+}
+
+#search-form {
+    display: flex;
+    align-items: center;
+    background: var(--glass-bg);
+    border: 1px solid var(--glass-border);
+    -webkit-backdrop-filter: blur(15px);
+    backdrop-filter: blur(15px);
+    border-radius: 50px; /* شكل الكبسولة */
+    padding: 8px 8px 8px 25px;
+    box-shadow: var(--card-shadow);
+    max-width: 600px;
+    transition: all 0.3s ease;
+}
+
+#search-form:focus-within {
+    border-color: var(--accent-color);
+    box-shadow: 0 0 20px rgba(56, 189, 248, 0.2), var(--card-shadow);
+}
+
+#city-input {
+    flex: 1;
+    border: none;
+    background: transparent;
+    color: var(--text-main);
+    font-size: 1.1rem;
+    outline: none;
+}
+
+#city-input::placeholder {
+    color: var(--text-dim);
+    font-weight: 300;
+}
+
+button[type="submit"] {
+    padding: 15px 35px;
+    border-radius: 40px;
+    border: none;
+    background: linear-gradient(135deg, #38bdf8, #0284c7);
+    color: #fff;
+    font-size: 1rem;
+    font-weight: 600;
+    cursor: pointer;
+    transition: all 0.3s ease;
+    box-shadow: 0 5px 15px rgba(56, 189, 248, 0.3);
+}
+
+button[type="submit"]:hover {
+    transform: scale(1.05);
+    box-shadow: 0 8px 25px rgba(56, 189, 248, 0.5);
+}
+
+/* --- الطقس الحالي --- */
+.current-weather-card {
+    margin-bottom: 50px;
+}
+
+.current-weather-card h2 {
+    font-size: 2.2rem;
+    font-weight: 700;
+    margin-bottom: 10px;
+}
+
+.weather-info {
+    display: flex;
+    align-items: center;
+    gap: 30px;
+}
+
+.weather-info img {
+    width: 140px;
+    height: auto;
+    filter: drop-shadow(0 15px 25px rgba(56, 189, 248, 0.3));
+    animation: float 6s ease-in-out infinite; /* أنيميشن طفو خفيف */
+}
+
+@keyframes float {
+    0% { transform: translateY(0px); }
+    50% { transform: translateY(-10px); }
+    100% { transform: translateY(0px); }
+}
+
+.weather-info .temp {
+    font-size: 4.5rem;
+    font-weight: 800;
+    color: var(--text-main);
+    line-height: 1;
+    background: linear-gradient(135deg, #fff, #38bdf8);
+    -webkit-background-clip: text;
+    -webkit-text-fill-color: transparent;
+}
+
+.weather-info .desc {
+    font-size: 1.4rem;
+    color: var(--accent-color);
+    font-weight: 500;
+    margin-top: 5px;
+}
+
+/* --- كروت التوقعات --- */
+.forecast-section h3 {
+    margin-bottom: 25px;
+    color: var(--text-dim);
+    text-transform: uppercase;
+    font-size: 1rem;
+    letter-spacing: 3px;
+    font-weight: 600;
+}
+
+.forecast-container {
+    display: flex;
+    gap: 25px;
+    padding-bottom: 20px;
+}
+
+.weather-card {
+    background: var(--glass-bg);
+    backdrop-filter: blur(15px);
+    -webkit-backdrop-filter: blur(15px);
+    flex: 1;
+    min-width: 160px;
+    padding: 30px 20px;
+    border-radius: 24px;
+    text-align: center;
+    border: 1px solid var(--glass-border);
+    box-shadow: var(--card-shadow);
+    transition: all 0.4s cubic-bezier(0.175, 0.885, 0.32, 1.275);
+}
+
+.weather-card:hover {
+    transform: translateY(-15px);
+    background: rgba(255, 255, 255, 0.05);
+    border-color: rgba(56, 189, 248, 0.4);
+    box-shadow: 0 25px 50px rgba(0, 0, 0, 0.5);
+}
+
+.weather-card h4 {
+    font-size: 1.2rem;
+    font-weight: 600;
+}
+
+/* --- جدول التوقعات --- */
+.forecast-table {
+    width: 100%;
+    border-collapse: separate;
+    border-spacing: 0;
+    margin-top: 40px;
+    background: var(--glass-bg);
+    border-radius: 24px;
+    overflow: hidden;
+    -webkit-backdrop-filter: blur(15px);
+    backdrop-filter: blur(15px);
+    border: 1px solid var(--glass-border);
+    box-shadow: var(--card-shadow);
+}
+
+.forecast-table th, .forecast-table td {
+    padding: 20px;
+    text-align: left;
+    border-bottom: 1px solid var(--glass-border);
+}
+
+.forecast-table th {
+    background-color: rgba(0, 0, 0, 0.2);
+    color: var(--text-dim);
+    text-transform: uppercase;
+    font-size: 0.85rem;
+    letter-spacing: 1.5px;
+    font-weight: 600;
+}
+
+.forecast-table tr:last-child td {
+    border-bottom: none;
+}
+
+.forecast-table tr:hover td {
+    background-color: rgba(255, 255, 255, 0.02);
+
+/* --- إصلاح تسريب زوايا الجدول (Corners Fix) --- */
+.forecast-table th:first-child {
+    border-top-left-radius: 24px;
+}
+
+.forecast-table th:last-child {
+    border-top-right-radius: 24px;
+}
+
+/* وتأميناً كمان للزوايا اللي تحت لو الماوس وقف عليها (Hover) */
+.forecast-table tr:last-child td:first-child {
+    border-bottom-left-radius: 24px;
+}
+
+.forecast-table tr:last-child td:last-child {
+    border-bottom-right-radius: 24px;
+}
+}
+
+/* =========================================
+   Light Mode Theme Variables & Overrides
+========================================= */
+body.light-mode {
+    --primary-bg: #f8fafc; 
+    --secondary-bg: #ffffff; 
+    --accent-color: #0284c7; 
+    --text-main: #0f172a; 
+    --text-dim: #64748b; 
+    --glass-bg: rgba(255, 255, 255, 0.7); 
+    --glass-border: rgba(0, 0, 0, 0.05);
+    --card-shadow: 0 20px 40px -10px rgba(0, 0, 0, 0.08);
+}
+
+body.light-mode .main-content {
+    background: radial-gradient(circle at top right, #f8fafc, #e2e8f0);
+}
+
+body.light-mode nav h1 {
+    background: linear-gradient(135deg, #0f172a, #0284c7);
+    -webkit-background-clip: text;
+    -webkit-text-fill-color: transparent;
+}
+
+body.light-mode .weather-info .temp {
+    background: linear-gradient(135deg, #0f172a, #0284c7);
+    -webkit-background-clip: text;
+    -webkit-text-fill-color: transparent;
+}
+
+body.light-mode #search-form {
+    background: #ffffff;
+    box-shadow: 0 10px 30px rgba(0, 0, 0, 0.05);
+}
+
+body.light-mode .weather-card {
+    background: rgba(255, 255, 255, 0.9);
+}
+
+body.light-mode .forecast-table {
+    background: rgba(255, 255, 255, 0.9);
+}
+
+body.light-mode .forecast-table th {
+    background-color: rgba(0, 0, 0, 0.02);
+}
+
+/* --- التجاوب مع الجوال --- */
+@media (max-width: 768px) {
+    .dashboard-container {
+        grid-template-columns: 1fr;
+        grid-template-areas: "main" "sidebar";
+    }
+    
+    .main-content {
+        padding: 20px;
+    }
+
+    #search-form {
+        flex-direction: column;
+        border-radius: 20px;
+        padding: 15px;
+    }
+    
+    button[type="submit"] {
+        width: 100%;
+        border-radius: 12px;
+    }
+
+    .forecast-container {
+        flex-direction: column;
+    }
+}

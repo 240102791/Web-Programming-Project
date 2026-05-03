@@ -1,0 +1,72 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Modern Weather Dashboard | SUT Project</title>
+    
+    <!-- Favicon: Added to display the project icon in the browser tab -->
+    <link rel="icon" type="image/png" href="images/icon.png">
+
+    <!-- External Stylesheet -->
+    <link rel="stylesheet" href="css/style.css">
+</head>
+<body>
+    
+    <div class="dashboard-container">
+        
+        <!-- Sidebar: Displays saved locations retrieved from the database via PHP -->
+        <aside class="sidebar">
+            <h2>Saved Locations</h2>
+            <div id="saved-cities">
+                <!-- Content dynamically injected via JavaScript & PHP -->
+            </div>
+        </aside>
+
+        <!-- Main Content Area -->
+        <main class="main-content">
+            
+            <!-- Header: Contains Navigation and Theme Toggle Control -->
+            <nav style="display: flex; justify-content: space-between; align-items: center; margin-bottom: 30px;">
+                <h1 style="margin-bottom: 0;">Weather Dashboard</h1>
+                <button id="theme-toggle" class="theme-toggle">☀️ Light Mode</button>
+            </nav>
+
+            <!-- Search Section: Handles user input for city queries -->
+            <section class="search-section">
+                <form id="search-form">
+                    <label for="city-input" style="display: none;">Search City</label>
+                    <input type="text" id="city-input" placeholder="e.g. Cairo" required autocomplete="off">
+                    <button type="submit">Search</button>
+                </form>
+            </section>
+
+            <!-- Current Weather Section: Displays primary weather data for the searched city -->
+            <section id="current-weather">
+                <!-- Weather card injected dynamically via JavaScript -->
+            </section>
+
+            <!-- 5-Day Forecast Section: Includes visual cards and detailed data table -->
+            <section class="forecast-section">
+                <h3>5-Day Forecast</h3>
+                
+                <!-- Container for forecast cards -->
+                <div id="forecast-cards" class="forecast-container">
+                    <!-- Cards injected dynamically via JavaScript -->
+                </div>
+                
+                <!-- A detailed HTML Table will be rendered here programmatically via JS -->
+            </section>
+
+            <!-- Project Credits & Team Signature -->
+            <footer style="margin-top: 50px; text-align: center; color: var(--text-dim); font-size: 0.9rem; border-top: 1px solid rgba(255,255,255,0.1); padding-top: 20px;">
+                <p>Developed with ❤️ by: <strong>Ahmed Aldmrdash</strong>, <strong>Omar Ramadan</strong> & <strong>Shimaa Hussien</strong> | SUT</p>
+            </footer>
+
+        </main>
+    </div>
+
+    <!-- Core Logic: External JavaScript file -->
+    <script src="js/app.js"></script>
+</body>
+</html>
