@@ -93,11 +93,10 @@ const updateMap = (lat, lon, temp, city) => {
             if(typeof Swal !== 'undefined') Swal.showLoading();
 
             try {
-                // 1. جلب العنوان التفصيلي (القرية/الحي) من Nominatim API
+                // 1. جلب العنوان التفصيلي (القرية/الحي) من Nominatim
                 const geoRes = await fetch(`https://nominatim.openstreetmap.org/reverse?format=jsonv2&lat=${lat}&lon=${lng}&accept-language=ar`);
                 const geoData = await geoRes.json();
 
-                // تحديد أدق اسم متاح (قرية، ضاحية، حي، أو منطقة)
                 const preciseLocation = geoData.address.village || 
                                         geoData.address.suburb || 
                                         geoData.address.neighbourhood || 
@@ -105,27 +104,28 @@ const updateMap = (lat, lon, temp, city) => {
                                         geoData.address.city_district || 
                                         geoData.name || "منطقة غير معروفة";
 
-                // 2. جلب بيانات الطقس من OpenWeatherMap بالإحداثيات
+                // 2. جلب بيانات الطقس بالإحداثيات (دي اللي هتحل المشكلة)
+                // بنستخدم lat و lon بدل q=name
                 const weatherRes = await fetch(`${BASE_URL}/weather?lat=${lat}&lon=${lng}&units=metric&appid=${API_KEY}`);
                 const weatherData = await weatherRes.json();
 
-                if (weatherData) {
-                    // استبدال اسم المدينة العام بالاسم الدقيق اللي جبناه من Nominatim
+                // 3. جلب التوقعات (Forecast) برضه بالإحداثيات
+                const forecastRes = await fetch(`${BASE_URL}/forecast?lat=${lat}&lon=${lng}&units=metric&appid=${API_KEY}`);
+                const forecastData = await forecastRes.json();
+
+                if (weatherData && forecastData) {
+                    // بنثبت الاسم الدقيق في العرض بس
                     weatherData.name = preciseLocation; 
 
-                    // تحديث الواجهة
                     displayCurrentWeather(weatherData);
-                    saveCityToHistory(preciseLocation);
-
-                    // جلب التوقعات للموقع الجديد
-                    const forecastRes = await fetch(`${BASE_URL}/forecast?lat=${lat}&lon=${lng}&units=metric&appid=${API_KEY}`);
-                    const forecastData = await forecastRes.json();
                     displayForecast(forecastData);
+                    saveCityToHistory(preciseLocation);
                 }
+                
                 if(typeof Swal !== 'undefined') Swal.close();
             } catch (err) {
                 console.error(err);
-                if(typeof Swal !== 'undefined') Swal.fire({ icon: 'error', title: 'خطأ', text: 'تعذر جلب تفاصيل هذا الموقع.' });
+                if(typeof Swal !== 'undefined') Swal.fire({ icon: 'error', title: 'Oops...', text: 'Could not fetch weather for this specific spot.' });
             }
         });
     } else {
