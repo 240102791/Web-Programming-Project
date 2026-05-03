@@ -86,31 +86,46 @@ const updateMap = (lat, lon, temp, city) => {
         }).addTo(map);
 
         // --- NEW: Add click listener to the map ---
+        // التعديل جوه ميزة "الضغط على الخريطة" لجلب العنوان الدقيق
         map.on('click', async (e) => {
             const { lat, lng } = e.latlng;
             
-            // Show a small loading indicator
             if(typeof Swal !== 'undefined') Swal.showLoading();
 
             try {
-                // Fetch weather by coordinates (Lat/Lon)
-                const response = await fetch(`${BASE_URL}/weather?lat=${lat}&lon=${lng}&units=metric&appid=${API_KEY}`);
-                const data = await response.json();
+                // 1. جلب العنوان التفصيلي (القرية/الحي) من Nominatim API
+                const geoRes = await fetch(`https://nominatim.openstreetmap.org/reverse?format=jsonv2&lat=${lat}&lon=${lng}&accept-language=ar`);
+                const geoData = await geoRes.json();
 
-                if (data && data.name) {
-                    // Update UI with the new clicked location's weather
-                    displayCurrentWeather(data);
-                    // Update Sidebar and Database
-                    saveCityToHistory(data.name);
+                // تحديد أدق اسم متاح (قرية، ضاحية، حي، أو منطقة)
+                const preciseLocation = geoData.address.village || 
+                                        geoData.address.suburb || 
+                                        geoData.address.neighbourhood || 
+                                        geoData.address.hamlet || 
+                                        geoData.address.city_district || 
+                                        geoData.name || "منطقة غير معروفة";
 
-                    // Fetch and display forecast for this new location
-                    const forecastRes = await fetch(`${BASE_URL}/forecast?q=${data.name}&units=metric&appid=${API_KEY}`);
+                // 2. جلب بيانات الطقس من OpenWeatherMap بالإحداثيات
+                const weatherRes = await fetch(`${BASE_URL}/weather?lat=${lat}&lon=${lng}&units=metric&appid=${API_KEY}`);
+                const weatherData = await weatherRes.json();
+
+                if (weatherData) {
+                    // استبدال اسم المدينة العام بالاسم الدقيق اللي جبناه من Nominatim
+                    weatherData.name = preciseLocation; 
+
+                    // تحديث الواجهة
+                    displayCurrentWeather(weatherData);
+                    saveCityToHistory(preciseLocation);
+
+                    // جلب التوقعات للموقع الجديد
+                    const forecastRes = await fetch(`${BASE_URL}/forecast?lat=${lat}&lon=${lng}&units=metric&appid=${API_KEY}`);
                     const forecastData = await forecastRes.json();
                     displayForecast(forecastData);
                 }
                 if(typeof Swal !== 'undefined') Swal.close();
             } catch (err) {
-                if(typeof Swal !== 'undefined') Swal.fire({ icon: 'error', title: 'Error', text: 'Could not fetch weather for this point.' });
+                console.error(err);
+                if(typeof Swal !== 'undefined') Swal.fire({ icon: 'error', title: 'خطأ', text: 'تعذر جلب تفاصيل هذا الموقع.' });
             }
         });
     } else {
@@ -403,24 +418,26 @@ const getUserLocation = () => {
             const lon = position.coords.longitude;
 
             try {
-                const response = await fetch(`${BASE_URL}/weather?lat=${lat}&lon=${lon}&appid=${API_KEY}`);
+                // جلب العنوان الدقيق أولاً
+                const geoRes = await fetch(`https://nominatim.openstreetmap.org/reverse?format=jsonv2&lat=${lat}&lon=${lon}&accept-language=ar`);
+                const geoData = await geoRes.json();
+                const preciseLocation = geoData.address.village || geoData.address.suburb || geoData.address.neighbourhood || geoData.name;
+
+                // جلب الطقس
+                const response = await fetch(`${BASE_URL}/weather?lat=${lat}&lon=${lon}&units=metric&appid=${API_KEY}`);
                 const data = await response.json();
                 
-                if (data && data.name) {
-                    const isSuccess = await fetchWeatherData(data.name);
-                    if (isSuccess) {
-                        saveCityToHistory(data.name); 
-                    }
+                if (data) {
+                    data.name = preciseLocation; // تعيين الاسم الدقيق
+                    displayCurrentWeather(data);
+                    saveCityToHistory(preciseLocation);
                 }
             } catch (error) {
-                console.warn("Could not fetch weather for current location.");
+                console.warn("Could not fetch hyper-local address.");
             }
-        }, (error) => {
-            console.log("User denied geolocation access or it failed.");
         });
     }
 };
-
 // =========================================================
 // Event Listeners & Initialization
 // =========================================================
