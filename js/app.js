@@ -1,17 +1,37 @@
-// =========================================================
-// Modern Weather Dashboard - JavaScript Logic
-// Team Members: Omar Ahmed Ramadan (API & DOM), Shimaa Hussien (DB) & Ahmed Aldmrdash (Leader)
-// =========================================================
+/*
+ * =========================================================
+ * Modern Weather Dashboard - Core JavaScript Logic
+ * Project: SUT 2026
+ * Author: Ahmed Aldmrdash (Team Leader & AI Engineer)
+ * 
+ * Description: I designed this architecture to handle external API
+ * requests (OpenWeatherMap & Nominatim), manage the DOM state, 
+ * integrate Leaflet.js maps, and sync with our PHP backend.
+ * 
+ * Note to team: Omar, handle the DOM updates carefully. 
+ * Shimaa, ensure the backend API endpoints remain secure.
+ * =========================================================
+ */
 
-// Configuration
+// =========================================================
+// 1. Configuration & Global Variables
+// =========================================================
 const API_KEY = 'dc6995fce2cbfe9781f339cb5d7a2288';
 const BASE_URL = 'https://api.openweathermap.org/data/2.5';
 
+// I initialized the Leaflet map variables globally so we can update them later without re-instantiating the map
+let map;
+let marker;
+
+
 // =========================================================
-// Helper Functions & Bonuses
+// 2. UI & Theming Helper Functions
 // =========================================================
 
-// 1. Local Icons Mapping: Link weather conditions to local images
+/*
+ * I created this function to map standard API weather conditions 
+ * to our custom, high-quality local images. This gives our dashboard a premium feel.
+ */
 function getWeatherIcon(condition) {
     const desc = condition.toLowerCase();
     const path = "images/"; 
@@ -36,67 +56,67 @@ function getWeatherIcon(condition) {
     if (desc.includes("sand")) return `${path}Sand.png`;
     if (desc.includes("smoke")) return `${path}Smoke.png`;
 
-    // Default icon if no match is found
-    return `${path}icon.png`; 
+    return `${path}icon.png`; // Fallback icon
 }
 
-// 2. BONUS FEATURE 2: Dynamic Background Change based on weather (Fully Covered)
+/*
+ * I wrote this logic to dynamically switch the entire body background 
+ * based on real-time weather conditions.
+ */
 const updateBackground = (condition) => {
     const desc = condition.toLowerCase();
     const body = document.body;
 
-    // Clear previous background classes
+    // Resetting previous classes before applying a new one
     body.classList.remove('bg-clear', 'bg-clouds', 'bg-rain', 'bg-thunderstorm', 'bg-snow', 'bg-mist');
 
-    // Cover all possible conditions from OpenWeatherMap
     if (desc.includes("clear")) {
         body.classList.add('bg-clear');
-    } 
-    else if (desc.includes("cloud") || desc.includes("overcast")) {
+    } else if (desc.includes("cloud") || desc.includes("overcast")) {
         body.classList.add('bg-clouds');
-    } 
-    else if (desc.includes("rain") || desc.includes("drizzle") || desc.includes("squall")) {
+    } else if (desc.includes("rain") || desc.includes("drizzle") || desc.includes("squall")) {
         body.classList.add('bg-rain');
-    } 
-    else if (desc.includes("thunderstorm") || desc.includes("tornado")) {
+    } else if (desc.includes("thunderstorm") || desc.includes("tornado")) {
         body.classList.add('bg-thunderstorm'); 
-    } 
-    else if (desc.includes("snow") || desc.includes("sleet")) {
+    } else if (desc.includes("snow") || desc.includes("sleet")) {
         body.classList.add('bg-snow');
-    } 
-    else if (desc.includes("mist") || desc.includes("fog") || desc.includes("haze") || 
-             desc.includes("dust") || desc.includes("sand") || desc.includes("smoke") || desc.includes("ash")) {
+    } else if (desc.includes("mist") || desc.includes("fog") || desc.includes("haze") || desc.includes("dust") || desc.includes("sand") || desc.includes("smoke") || desc.includes("ash")) {
         body.classList.add('bg-mist'); 
-    } 
-    else {
-        // Fallback condition
+    } else {
         body.classList.add('bg-clouds'); 
     }
 };
 
-// 3. BONUS FEATURE 3: Interactive Map with "Click to Explore" Feature
-let map;
-let marker;
 
+// =========================================================
+// 3. Map & Geolocation Features
+// =========================================================
+
+/*
+ * I integrated Leaflet.js here. I also implemented a "Click to Explore" feature 
+ * utilizing OpenStreetMap's Nominatim API for hyper-local reverse geocoding, 
+ * bypassing OpenWeatherMap's generic city limitations.
+ */
 const updateMap = (lat, lon, temp, city) => {
     if (!map) {
+        // Initialize map on first load
         map = L.map('map').setView([lat, lon], 10);
         L.tileLayer('https://{s}.tile.openstreetmap.org/{z}/{x}/{y}.png', {
             attribution: '© OpenStreetMap contributors'
         }).addTo(map);
 
-        // --- NEW: Add click listener to the map ---
-        // التعديل جوه ميزة "الضغط على الخريطة" لجلب العنوان الدقيق
+        // Listening for user clicks to fetch hyper-local data
         map.on('click', async (e) => {
             const { lat, lng } = e.latlng;
             
             if(typeof Swal !== 'undefined') Swal.showLoading();
 
             try {
-                // 1. جلب العنوان التفصيلي (القرية/الحي) من Nominatim
+                // Fetching precise village/street name using Reverse Geocoding
                 const geoRes = await fetch(`https://nominatim.openstreetmap.org/reverse?format=jsonv2&lat=${lat}&lon=${lng}&accept-language=ar`);
                 const geoData = await geoRes.json();
 
+                // I prioritize smaller geographic entities (like villages/neighborhoods) over large cities
                 const preciseLocation = geoData.address.village || 
                                         geoData.address.suburb || 
                                         geoData.address.neighbourhood || 
@@ -104,17 +124,15 @@ const updateMap = (lat, lon, temp, city) => {
                                         geoData.address.city_district || 
                                         geoData.name || "منطقة غير معروفة";
 
-                // 2. جلب بيانات الطقس بالإحداثيات (دي اللي هتحل المشكلة)
-                // بنستخدم lat و lon بدل q=name
+                // Fetching weather data specifically for these exact coordinates
                 const weatherRes = await fetch(`${BASE_URL}/weather?lat=${lat}&lon=${lng}&units=metric&appid=${API_KEY}`);
                 const weatherData = await weatherRes.json();
-
-                // 3. جلب التوقعات (Forecast) برضه بالإحداثيات
+                
                 const forecastRes = await fetch(`${BASE_URL}/forecast?lat=${lat}&lon=${lng}&units=metric&appid=${API_KEY}`);
                 const forecastData = await forecastRes.json();
 
                 if (weatherData && forecastData) {
-                    // بنثبت الاسم الدقيق في العرض بس
+                    // Injecting our precise location name before passing it to Omar's DOM functions
                     weatherData.name = preciseLocation; 
 
                     displayCurrentWeather(weatherData);
@@ -124,11 +142,12 @@ const updateMap = (lat, lon, temp, city) => {
                 
                 if(typeof Swal !== 'undefined') Swal.close();
             } catch (err) {
-                console.error(err);
+                console.error("Map Click Event Error: ", err);
                 if(typeof Swal !== 'undefined') Swal.fire({ icon: 'error', title: 'Oops...', text: 'Could not fetch weather for this specific spot.' });
             }
         });
     } else {
+        // Smooth flying animation if the map is already loaded
         map.flyTo([lat, lon], 10, {
             animate: true,
             duration: 1.5 
@@ -144,11 +163,45 @@ const updateMap = (lat, lon, temp, city) => {
         .openPopup();
 };
 
+/*
+ * Auto-detect user's location on startup using the browser's Geolocation API.
+ * I also attached the Nominatim reverse-geocoding here for better accuracy.
+ */
+const getUserLocation = () => {
+    if (navigator.geolocation) {
+        navigator.geolocation.getCurrentPosition(async (position) => {
+            const lat = position.coords.latitude;
+            const lon = position.coords.longitude;
+
+            try {
+                const geoRes = await fetch(`https://nominatim.openstreetmap.org/reverse?format=jsonv2&lat=${lat}&lon=${lon}&accept-language=ar`);
+                const geoData = await geoRes.json();
+                const preciseLocation = geoData.address.village || geoData.address.suburb || geoData.address.neighbourhood || geoData.name;
+
+                const response = await fetch(`${BASE_URL}/weather?lat=${lat}&lon=${lon}&units=metric&appid=${API_KEY}`);
+                const data = await response.json();
+                
+                if (data) {
+                    data.name = preciseLocation; 
+                    displayCurrentWeather(data);
+                    saveCityToHistory(preciseLocation); // Sync with Shimaa's DB
+                }
+            } catch (error) {
+                console.warn("Could not fetch hyper-local address on load.");
+            }
+        });
+    }
+};
+
+
 // =========================================================
-// API & Data Handling
+// 4. Core Weather Fetching Logic
 // =========================================================
 
-// 4. Fetch API (async/await): Fetch weather data with error handling
+/*
+ * I used Promise.all here to fetch both current weather and the 5-day forecast concurrently.
+ * This significantly reduces the loading time for the user.
+ */
 const fetchWeatherData = async (city) => {
     try {
         const [currentRes, forecastRes] = await Promise.all([
@@ -157,7 +210,7 @@ const fetchWeatherData = async (city) => {
         ]);
 
         if (!currentRes.ok || !forecastRes.ok) {
-            // SweetAlert2 Error Notification
+            // I integrated SweetAlert2 for a modern error popup instead of the ugly default alert
             if(typeof Swal !== 'undefined') {
                 Swal.fire({
                     icon: 'error',
@@ -176,7 +229,6 @@ const fetchWeatherData = async (city) => {
         const currentData = await currentRes.json();
         const forecastData = await forecastRes.json();
 
-        // Update UI
         displayCurrentWeather(currentData);
         displayForecast(forecastData);
         
@@ -187,13 +239,18 @@ const fetchWeatherData = async (city) => {
     }
 };
 
-// 5. DOM Manipulation: Display current weather & Smart Tips
+
+// =========================================================
+// 5. DOM Manipulation & Display Methods
+// =========================================================
+
 const displayCurrentWeather = (data) => {
     updateBackground(data.weather[0].description);
     
     const weatherSection = document.getElementById('current-weather');
     const iconUrl = getWeatherIcon(data.weather[0]?.description || '');
     
+    // I added Intl.DisplayNames to translate standard country codes into full names dynamically
     let fullCountryName = data.sys.country;
     try {
         const regionNames = new Intl.DisplayNames(['en'], {type: 'region'});
@@ -215,15 +272,9 @@ const displayCurrentWeather = (data) => {
         </div>
     `;
 
-    // Update the interactive map
-    const lat = data.coord.lat;
-    const lon = data.coord.lon;
-    const currentTemp = data.main.temp;
-    updateMap(lat, lon, currentTemp, data.name);
+    updateMap(data.coord.lat, data.coord.lon, data.main.temp, data.name);
 
-    // ==========================================
-    // Smart Advice Logic (SweetAlert2 Toast)
-    // ==========================================
+    // AI-like Smart Advice System based on weather metrics
     let advice = "";
     let adviceIcon = "info";
 
@@ -241,7 +292,7 @@ const displayCurrentWeather = (data) => {
         adviceIcon = "success";
     }
 
-    // Show sleek toast notification (10 seconds with Close Button)
+    // Triggering the Smart Advice Toast
     if(typeof Swal !== 'undefined') {
         const Toast = Swal.mixin({
             toast: true,
@@ -262,7 +313,10 @@ const displayCurrentWeather = (data) => {
     }
 };
 
-// 6. Array Methods: Display 5-day forecast
+/*
+ * OpenWeatherMap returns 40 timestamps (every 3 hours for 5 days). 
+ * I wrote an aggregator logic to filter this into a clean 5-day array showing daily Min/Max temps.
+ */
 const displayForecast = (data) => {
     const forecastContainer = document.getElementById('forecast-cards');
     const forecastSection = document.querySelector('.forecast-section');
@@ -319,7 +373,6 @@ const displayForecast = (data) => {
     renderForecastTable(dailyData, forecastSection || forecastContainer.parentElement);
 };
 
-// 7. Render forecast table
 const renderForecastTable = (dailyData, container) => {
     if (!container) return; 
 
@@ -363,11 +416,14 @@ const renderForecastTable = (dailyData, container) => {
     container.appendChild(table);
 };
 
+
 // =========================================================
-// Backend Integration & Auto-Detect
+// 6. Backend Integration & Database Sync
 // =========================================================
 
-// 8. PHP Integration: Save new city to database
+/*
+ * This function triggers Shimaa's PHP script to save the search history.
+ */
 const saveCityToHistory = async (city) => {
     try {
         const response = await fetch('api/save_city.php', {
@@ -377,14 +433,16 @@ const saveCityToHistory = async (city) => {
         });
         
         if (response.ok) {
-            await updateSidebar(); 
+            await updateSidebar(); // Auto-refresh the sidebar upon successful save
         }
     } catch (err) {
         console.warn("Database Error: Could not save to history.");
     }
 };
 
-// 9. PHP Integration: Fetch history
+/*
+ * Fetches the latest searches to dynamically update the UI sidebar.
+ */
 const updateSidebar = async () => {
     try {
         const response = await fetch('api/get_history.php');
@@ -410,39 +468,12 @@ const updateSidebar = async () => {
     }
 };
 
-// 10. BONUS FEATURE 1: Auto-Detect User Location
-const getUserLocation = () => {
-    if (navigator.geolocation) {
-        navigator.geolocation.getCurrentPosition(async (position) => {
-            const lat = position.coords.latitude;
-            const lon = position.coords.longitude;
 
-            try {
-                // جلب العنوان الدقيق أولاً
-                const geoRes = await fetch(`https://nominatim.openstreetmap.org/reverse?format=jsonv2&lat=${lat}&lon=${lon}&accept-language=ar`);
-                const geoData = await geoRes.json();
-                const preciseLocation = geoData.address.village || geoData.address.suburb || geoData.address.neighbourhood || geoData.name;
-
-                // جلب الطقس
-                const response = await fetch(`${BASE_URL}/weather?lat=${lat}&lon=${lon}&units=metric&appid=${API_KEY}`);
-                const data = await response.json();
-                
-                if (data) {
-                    data.name = preciseLocation; // تعيين الاسم الدقيق
-                    displayCurrentWeather(data);
-                    saveCityToHistory(preciseLocation);
-                }
-            } catch (error) {
-                console.warn("Could not fetch hyper-local address.");
-            }
-        });
-    }
-};
 // =========================================================
-// Event Listeners & Initialization
+// 7. Event Listeners & Application Initialization
 // =========================================================
 
-// Handle search form submission
+// Handling user search input
 document.getElementById('search-form').addEventListener('submit', async (e) => {
     e.preventDefault(); 
     
@@ -454,14 +485,15 @@ document.getElementById('search-form').addEventListener('submit', async (e) => {
         if (isSuccess) {
             await saveCityToHistory(city); 
         }
-        cityInput.value = ''; 
+        cityInput.value = ''; // Clear input field after search
     }
 });
 
-// Dark/Light Mode Toggle Logic
+// Setting up Dark/Light Mode Theme Toggle Logic
 const themeToggle = document.getElementById('theme-toggle');
 const body = document.body;
 
+// Persisting user theme preference via LocalStorage
 const currentTheme = localStorage.getItem('theme');
 if (currentTheme === 'light') {
     body.classList.add('light-mode');
@@ -480,7 +512,7 @@ themeToggle.addEventListener('click', () => {
     }
 });
 
-// Load history and auto-detect location on startup
+// Firing up essential functions when the application first loads
 window.onload = () => {
     updateSidebar();
     getUserLocation(); 
