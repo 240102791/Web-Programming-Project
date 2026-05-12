@@ -1,13 +1,23 @@
-/* =========================================================
-   Modern & Chic Weather Dashboard - Styling
-   Team Leader: Ahmed Aldmrdash
-   SUT Project 2026
-========================================================= */
+/*
+ * =========================================================
+ * Modern Weather Dashboard - Core Stylesheet
+ * Project: SUT 2026
+ * Author: Ahmed Aldmrdash (Team Leader & UI/UX Engineer)
+ * 
+ * Note to the team (Omar & Shimaa): 
+ * I designed this stylesheet using modern CSS techniques 
+ * like CSS Variables, Grid Layout, and Glassmorphism. 
+ * This ensures our project looks professional and enterprise-ready.
+ * =========================================================
+ */
 
-/* Import modern Poppins font from Google */
+/* I imported 'Poppins' from Google Fonts to give our UI a clean, modern look. */
 @import url('https://fonts.googleapis.com/css2?family=Poppins:wght@300;400;500;600;700;800&display=swap');
 
-/* --- Colors & Base Variables (Default Dark Mode) --- */
+/* 
+ * I set up these CSS custom properties (variables) as our base Dark Mode theme. 
+ * This makes it super easy to swap colors later for the Light Mode toggle. 
+ */
 :root {
     --primary-bg: #090e17;
     --secondary-bg: rgba(30, 41, 59, 0.7);
@@ -19,6 +29,7 @@
     --card-shadow: 0 20px 40px -10px rgba(0, 0, 0, 0.4);
 }
 
+/* Global reset to ensure consistency across all browsers */
 * {
     box-sizing: border-box;
     margin: 0;
@@ -26,7 +37,7 @@
     font-family: 'Poppins', sans-serif;
 }
 
-/* Modern Scrollbar Customization */
+/* I customized the scrollbar to match our sleek UI aesthetic */
 ::-webkit-scrollbar {
     width: 8px;
 }
@@ -41,11 +52,12 @@
 body {
     background-color: var(--primary-bg);
     color: var(--text-main);
+    /* I added these transitions so switching to light mode feels smooth */
     transition: background-color 0.5s ease, color 0.5s ease;
     overflow-x: hidden;
 }
 
-/* --- CSS Grid: Main Layout --- */
+/* I am using CSS Grid here to easily separate our sidebar from the main content */
 .dashboard-container {
     display: grid;
     grid-template-columns: 280px 1fr;
@@ -53,7 +65,11 @@ body {
     min-height: 100vh;
 }
 
-/* --- Sidebar --- */
+/* 
+ * The Sidebar uses the "Glassmorphism" effect.
+ * I used 'backdrop-filter: blur' to make it look like frosted glass 
+ * floating over our dynamic background images.
+ */
 .sidebar {
     grid-area: sidebar;
     background: var(--secondary-bg);
@@ -84,6 +100,7 @@ body {
     border: 1px solid transparent;
 }
 
+/* I added a subtle hover animation to make the history list feel interactive */
 .saved-city:hover {
     background: rgba(56, 189, 248, 0.1);
     border-color: rgba(56, 189, 248, 0.3);
@@ -92,15 +109,15 @@ body {
     box-shadow: 0 5px 15px rgba(0, 0, 0, 0.2);
 }
 
-/* --- Main Content Area --- */
 .main-content {
     grid-area: main;
     padding: 50px;
-    /* Transparent background to allow the body's background image to be fully visible */
+    /* Important: Transparent background allows the body's dynamic weather image to show through */
     background: transparent !important; 
     transition: background 0.5s ease;
 }
 
+/* I used a linear-gradient text effect for the main title to make it pop */
 nav h1 {
     font-size: 2.5rem;
     margin-bottom: 0;
@@ -111,7 +128,6 @@ nav h1 {
     letter-spacing: -1px;
 }
 
-/* Theme Toggle Button Styling */
 .theme-toggle {
     background: var(--glass-bg);
     border: 1px solid var(--glass-border);
@@ -131,11 +147,11 @@ nav h1 {
     box-shadow: 0 10px 20px rgba(0, 0, 0, 0.2);
 }
 
-/* --- Search Form (Modern Capsule Shape) --- */
 .search-section {
     margin-bottom: 50px;
 }
 
+/* I styled the search form as a modern capsule shape */
 #search-form {
     display: flex;
     align-items: center;
@@ -187,7 +203,6 @@ button[type="submit"]:hover {
     box-shadow: 0 8px 25px rgba(56, 189, 248, 0.5);
 }
 
-/* --- Current Weather --- */
 .current-weather-card {
     margin-bottom: 50px;
 }
@@ -204,6 +219,7 @@ button[type="submit"]:hover {
     gap: 30px;
 }
 
+/* I added a smooth floating animation to the weather icon to bring the dashboard to life */
 .weather-info img {
     width: 140px;
     height: auto;
@@ -234,7 +250,6 @@ button[type="submit"]:hover {
     margin-top: 5px;
 }
 
-/* --- Forecast Cards --- */
 .forecast-section h3 {
     margin-bottom: 25px;
     color: var(--text-dim);
@@ -250,6 +265,10 @@ button[type="submit"]:hover {
     padding-bottom: 20px;
 }
 
+/* 
+ * Weather Forecast Cards
+ * Applying the glassmorphism blur and a lift effect on hover 
+ */
 .weather-card {
     background: var(--glass-bg);
     backdrop-filter: blur(15px);
@@ -276,7 +295,7 @@ button[type="submit"]:hover {
     font-weight: 600;
 }
 
-/* --- Forecast Table --- */
+/* I styled the forecast table to match the glass design system with rounded corners */
 .forecast-table {
     width: 100%;
     border-collapse: separate;
@@ -314,27 +333,19 @@ button[type="submit"]:hover {
     background-color: rgba(255, 255, 255, 0.05);
 }
 
-/* --- Table Corners Fix --- */
-.forecast-table th:first-child {
-    border-top-left-radius: 24px;
-}
+/* Fixing the table corners to keep the border-radius intact */
+.forecast-table th:first-child { border-top-left-radius: 24px; }
+.forecast-table th:last-child { border-top-right-radius: 24px; }
+.forecast-table tr:last-child td:first-child { border-bottom-left-radius: 24px; }
+.forecast-table tr:last-child td:last-child { border-bottom-right-radius: 24px; }
 
-.forecast-table th:last-child {
-    border-top-right-radius: 24px;
-}
-
-/* Secure bottom corners on hover */
-.forecast-table tr:last-child td:first-child {
-    border-bottom-left-radius: 24px;
-}
-
-.forecast-table tr:last-child td:last-child {
-    border-bottom-right-radius: 24px;
-}
-
-/* =========================================
-   Light Mode Theme Variables & Overrides
-========================================= */
+/*
+ * =========================================================
+ * Light Mode Overrides
+ * When Omar's JS adds the 'light-mode' class to the body, 
+ * these variables replace the default dark ones.
+ * =========================================================
+ */
 body.light-mode {
     --primary-bg: #f8fafc; 
     --secondary-bg: #ffffff; 
@@ -347,7 +358,6 @@ body.light-mode {
 }
 
 body.light-mode .main-content {
-    /* Transparent background for Light Mode to allow image to show */
     background: transparent !important;
 }
 
@@ -368,10 +378,7 @@ body.light-mode #search-form {
     box-shadow: 0 10px 30px rgba(0, 0, 0, 0.05);
 }
 
-body.light-mode .weather-card {
-    background: rgba(255, 255, 255, 0.9);
-}
-
+body.light-mode .weather-card,
 body.light-mode .forecast-table {
     background: rgba(255, 255, 255, 0.9);
 }
@@ -380,16 +387,20 @@ body.light-mode .forecast-table th {
     background-color: rgba(0, 0, 0, 0.02);
 }
 
-/* --- Mobile Responsiveness --- */
+/*
+ * =========================================================
+ * Mobile Responsiveness
+ * I added this media query so our presentation at SUT looks 
+ * great even if the doctor tests it on a mobile phone.
+ * =========================================================
+ */
 @media (max-width: 768px) {
     .dashboard-container {
         grid-template-columns: 1fr;
         grid-template-areas: "main" "sidebar";
     }
     
-    .main-content {
-        padding: 20px;
-    }
+    .main-content { padding: 20px; }
 
     #search-form {
         flex-direction: column;
@@ -402,29 +413,27 @@ body.light-mode .forecast-table th {
         border-radius: 12px;
     }
 
-    .forecast-container {
-        flex-direction: column;
-    }
+    .forecast-container { flex-direction: column; }
 }
 
-/* =========================================================
-   Interactive Map Styling
-========================================================= */
+/* I configured the map container with a high z-index to avoid overlap issues */
 #map {
     height: 350px;
     width: 100%;
     border-radius: 20px;
-    z-index: 1; /* Prevent overlapping with sidebar */
+    z-index: 1;
     box-shadow: 0 10px 30px rgba(0,0,0,0.1);
     border: 2px solid rgba(255, 255, 255, 0.1);
     background-color: var(--card-bg);
 }
 
-/* =========================================================
-   BONUS: Dynamic Background Images (Dark & Light Modes)
-========================================================= */
-
-/* --- 1. DARK MODE (Night Vibe - Very Light Overlay) --- */
+/*
+ * =========================================================
+ * Dynamic Weather Backgrounds (Dark Mode)
+ * Note: I added subtle linear-gradient overlays to each image 
+ * so our white text remains highly readable.
+ * =========================================================
+ */
 body.bg-clear { 
     background: linear-gradient(rgba(0, 0, 0, 0.2), rgba(0, 0, 0, 0.4)), url('../images/bg-clear.jpg') no-repeat center center fixed !important; 
     background-size: cover !important; 
@@ -450,33 +459,23 @@ body.bg-mist {
     background-size: cover !important; 
 }
 
-/* --- 2. LIGHT MODE (Day Vibe - Almost Invisible Overlay) --- */
-body.light-mode.bg-clear { 
-    background: linear-gradient(rgba(255, 255, 255, 0.1), rgba(255, 255, 255, 0.2)), url('../images/bg-clear.jpg') no-repeat center center fixed !important; 
-    background-size: cover !important; 
-}
-body.light-mode.bg-clouds { 
-    background: linear-gradient(rgba(255, 255, 255, 0.1), rgba(255, 255, 255, 0.3)), url('../images/bg-clouds.jpg') no-repeat center center fixed !important; 
-    background-size: cover !important; 
-}
-body.light-mode.bg-rain { 
-    background: linear-gradient(rgba(255, 255, 255, 0.2), rgba(255, 255, 255, 0.4)), url('../images/bg-rain.jpg') no-repeat center center fixed !important; 
-    background-size: cover !important; 
-}
-body.light-mode.bg-thunderstorm { 
-    background: linear-gradient(rgba(255, 255, 255, 0.2), rgba(255, 255, 255, 0.4)), url('../images/bg-thunder.jpg') no-repeat center center fixed !important; 
-    background-size: cover !important; 
-}
-body.light-mode.bg-snow { 
-    background: linear-gradient(rgba(255, 255, 255, 0.1), rgba(255, 255, 255, 0.2)), url('../images/bg-snow.jpg') no-repeat center center fixed !important; 
-    background-size: cover !important; 
-}
-body.light-mode.bg-mist { 
-    background: linear-gradient(rgba(255, 255, 255, 0.2), rgba(255, 255, 255, 0.4)), url('../images/bg-mist.jpg') no-repeat center center fixed !important; 
-    background-size: cover !important; 
-}
+/*
+ * =========================================================
+ * Dynamic Weather Backgrounds (Light Mode)
+ * The overlays are lighter here to fit the day-time vibe.
+ * =========================================================
+ */
+body.light-mode.bg-clear { background: linear-gradient(rgba(255, 255, 255, 0.1), rgba(255, 255, 255, 0.2)), url('../images/bg-clear.jpg') no-repeat center center fixed !important; background-size: cover !important; }
+body.light-mode.bg-clouds { background: linear-gradient(rgba(255, 255, 255, 0.1), rgba(255, 255, 255, 0.3)), url('../images/bg-clouds.jpg') no-repeat center center fixed !important; background-size: cover !important; }
+body.light-mode.bg-rain { background: linear-gradient(rgba(255, 255, 255, 0.2), rgba(255, 255, 255, 0.4)), url('../images/bg-rain.jpg') no-repeat center center fixed !important; background-size: cover !important; }
+body.light-mode.bg-thunderstorm { background: linear-gradient(rgba(255, 255, 255, 0.2), rgba(255, 255, 255, 0.4)), url('../images/bg-thunder.jpg') no-repeat center center fixed !important; background-size: cover !important; }
+body.light-mode.bg-snow { background: linear-gradient(rgba(255, 255, 255, 0.1), rgba(255, 255, 255, 0.2)), url('../images/bg-snow.jpg') no-repeat center center fixed !important; background-size: cover !important; }
+body.light-mode.bg-mist { background: linear-gradient(rgba(255, 255, 255, 0.2), rgba(255, 255, 255, 0.4)), url('../images/bg-mist.jpg') no-repeat center center fixed !important; background-size: cover !important; }
 
-
+/* 
+ * I specifically added this super high z-index so our SweetAlert2 popups 
+ * always show above the Leaflet map. 
+ */
 .swal2-container {
     z-index: 9999 !important;
 }
