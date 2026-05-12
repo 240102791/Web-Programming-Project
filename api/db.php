@@ -26,4 +26,4 @@ if ($conn->connect_error) {
 }
 
 // If we reach here, the connection is successful!
-?>
+?> 
